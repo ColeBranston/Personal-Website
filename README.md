@@ -1,4 +1,4 @@
-# Cole Branston — Portfolio
+# Cole Branston - Portfolio
 
 A dark, terminal-inspired personal site built with Next.js (App Router). Content
 (personal info, education, skills, work experience, projects) is pulled at
