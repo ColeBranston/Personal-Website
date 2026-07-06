@@ -39,27 +39,10 @@ Fill in `.env.local`:
 | Variable | Required | Notes |
 |---|---|---|
 | `CONFIG_URL` | no | Defaults to your config repo's raw `main` branch URL. |
-| `REDIS_URL` | recommended | `redis://default:<password>@redis-12326.c257.us-east-1-3.ec2.cloud.redislabs.com:12326` — grab the password from your Redis Cloud dashboard. Without it, the site works but skips caching. |
+| `REDIS_URL` | recommended | `{REDIS URL}` — grab the password from your Redis Cloud dashboard. Without it, the site works but skips caching. |
 | `GITHUB_TOKEN` | recommended | A [personal access token](https://github.com/settings/tokens) (no scopes needed, repos are public) — raises the GitHub API limit from 60/hr to 5,000/hr. Without it, caching alone should keep you under 60/hr as long as you don't have >60 site loads hitting uncached repos per hour. |
 | `COMMITS_CACHE_TTL` | no | Seconds to cache GitHub commit data. Default `3600` (1 hour). |
 | `CONFIG_CACHE_TTL` | no | Seconds to cache `config.json`. Default `300` (5 minutes). |
-
-Then run it:
-
-```bash
-npm run dev
-```
-
-Open http://localhost:3000.
-
-## Deploying to Vercel
-
-1. Push this repo to GitHub.
-2. Import it in Vercel.
-3. Add the same environment variables from `.env.local` under
-   **Project Settings → Environment Variables**.
-4. Deploy. Vercel runs `next build` and hosts the API routes as serverless
-   functions automatically — no extra config needed.
 
 ## Per-company timeline colors
 
@@ -89,18 +72,3 @@ normal GitHub file-viewer URL) is automatically rewritten to the equivalent
 `raw.githubusercontent.com` URL under the hood, since the `blob` page serves
 an HTML wrapper, not the actual image — so you can paste either the raw URL
 or just copy the link straight from GitHub's UI and it'll work.
-
-## Notes / things to double check
-
-- This code was written and reviewed without running `npm install` in the
-  authoring sandbox (its network policy blocks the npm registry). Run
-  `npm install && npm run build` once locally before your first deploy to
-  catch anything sandbox review could have missed.
-- `stats/commit_activity` is computed asynchronously by GitHub for repos it
-  hasn't cached yet — the very first request for a brand-new/rarely-visited
-  repo may show an empty commit graph until GitHub finishes computing it
-  (usually a few seconds; the app retries once automatically).
-- Per-commit line-change stats require one GitHub API call per commit (25
-  commits shown per project), which is the main reason Redis caching
-  matters here — without it, opening a couple of project modals could burn
-  through the unauthenticated 60/hr limit by itself.
