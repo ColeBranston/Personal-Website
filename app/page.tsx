@@ -1,6 +1,7 @@
 import { getSiteConfig } from "@/lib/config";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
+import AboutMe from "@/components/AboutMe";
 import Timeline from "@/components/Timeline";
 import Projects from "@/components/Projects";
 import Skills from "@/components/Skills";
@@ -35,6 +36,7 @@ export default async function Home() {
     <main>
       <Nav name={config.personal.name} />
       <Hero personal={config.personal} education={config.education} currentRole={currentRole} />
+      <AboutMe name={config.personal.name} />
       <Timeline experience={config.work_experience} />
       <Projects projects={config.projects} />
       <Skills skills={config.skills} education={config.education} />
