@@ -1,9 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ABOUT_ME_ASCII } from "@/lib/aboutArt";
 import SectionHeading from "./SectionHeading";
+
+// Noise alphabet matches the two characters the real art is built from
+// (see lib/aboutArt.ts), so the scramble reads as "static" from the same
+// font/weight rather than random unrelated glyphs.
+const SCRAMBLE_CHARS = ["#", " "];
+const SCRAMBLE_DURATION_MS = 800;
+// Redraw the noise on an interval slower than 60fps to keep the ~53k-char
+// rebuild cheap; still reads as smooth motion at this duration.
+const SCRAMBLE_FRAME_INTERVAL_MS = 40;
 
 const COLOR_SCHEMES = [
   {
@@ -36,6 +45,58 @@ export default function AboutMe({ name }: { name: string }) {
   const [scheme, setScheme] = useState<SchemeId>("bw");
   const active = COLOR_SCHEMES.find((s) => s.id === scheme) ?? COLOR_SCHEMES[0];
 
+  const [displayArt, setDisplayArt] = useState(ABOUT_ME_ASCII);
+  const hasScrambledRef = useRef(false);
+  const frameRef = useRef<number>();
+
+  useEffect(() => {
+    return () => {
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    };
+  }, []);
+
+  const runScramble = () => {
+    if (hasScrambledRef.current) return;
+    hasScrambledRef.current = true;
+
+    const finalArt = ABOUT_ME_ASCII;
+    const len = finalArt.length;
+    // Each character locks into its final value at its own random moment
+    // within the window, so the image resolves as a wave of noise settling
+    // rather than a single uniform fade.
+    const revealAt = new Float32Array(len);
+    for (let i = 0; i < len; i++) {
+      revealAt[i] = finalArt[i] === "\n" ? 0 : Math.random() * SCRAMBLE_DURATION_MS;
+    }
+
+    const start = performance.now();
+    let lastRender = 0;
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      if (elapsed >= SCRAMBLE_DURATION_MS) {
+        setDisplayArt(finalArt);
+        frameRef.current = undefined;
+        return;
+      }
+      if (now - lastRender >= SCRAMBLE_FRAME_INTERVAL_MS) {
+        lastRender = now;
+        const out = new Array(len);
+        for (let i = 0; i < len; i++) {
+          const ch = finalArt[i];
+          out[i] =
+            ch === "\n" || elapsed >= revealAt[i]
+              ? ch
+              : SCRAMBLE_CHARS[Math.random() < 0.5 ? 0 : 1];
+        }
+        setDisplayArt(out.join(""));
+      }
+      frameRef.current = requestAnimationFrame(tick);
+    };
+
+    frameRef.current = requestAnimationFrame(tick);
+  };
+
   return (
     <section id="about" className="relative py-28">
       <div className="container-page">
@@ -45,6 +106,7 @@ export default function AboutMe({ name }: { name: string }) {
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             whileInView={{ opacity: 1, scale: 1 }}
+            onViewportEnter={runScramble}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="glass mx-auto w-full max-w-[520px] overflow-hidden rounded-xl shadow-glass"
@@ -59,7 +121,7 @@ export default function AboutMe({ name }: { name: string }) {
               <pre
                 className={`select-none overflow-x-auto p-5 text-left font-mono text-[1.6px] leading-[1.8px] transition-colors duration-300 sm:text-[2px] sm:leading-[2.2px] ${active.bg} ${active.text}`}
               >
-                {ABOUT_ME_ASCII}
+                {displayArt}
               </pre>
               <div className="flex flex-1 flex-col items-center justify-center gap-3 border-l border-bg-border px-4">
                 {COLOR_SCHEMES.map((s) => (
