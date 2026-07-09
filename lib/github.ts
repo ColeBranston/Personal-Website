@@ -36,7 +36,7 @@ function ghHeaders(): HeadersInit {
     "User-Agent": "cole-branston-portfolio",
     "X-GitHub-Api-Version": "2022-11-28",
   };
-  const token = process.env.GITHUB_TOKEN;
+  const token = process.env.TOKEN;
   if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
 }

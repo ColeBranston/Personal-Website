@@ -24,7 +24,7 @@ GitHub REST API and cached in Redis so the site doesn't get rate-limited.
   backend endpoints. The homepage (`app/page.tsx`) calls `getSiteConfig()`
   directly on the server; `ProjectModal` calls `/api/commits?repo=<url>`
   client-side when a project card is opened.
-- All secrets (`CONFIG_URL`, `REDIS_URL`, `GITHUB_TOKEN`) are read from
+- All secrets (`CONFIG_URL`, `REDIS_URL`, `TOKEN`) are read from
   environment variables — nothing is hardcoded.
 
 ## Setup
@@ -40,7 +40,7 @@ Fill in `.env.local`:
 |---|---|---|
 | `CONFIG_URL` | no | Defaults to your config repo's raw `main` branch URL. |
 | `REDIS_URL` | recommended | `REDIS_URL` — grab the password from your Redis Cloud dashboard. Without it, the site works but skips caching. |
-| `GITHUB_TOKEN` | recommended | A [personal access token](https://github.com/settings/tokens) (no scopes needed, repos are public) — raises the GitHub API limit from 60/hr to 5,000/hr. Without it, caching alone should keep you under 60/hr as long as you don't have >60 site loads hitting uncached repos per hour. |
+| `TOKEN` | recommended | A [personal access token](https://github.com/settings/tokens) (no scopes needed, repos are public) — raises the GitHub API limit from 60/hr to 5,000/hr. Without it, caching alone should keep you under 60/hr as long as you don't have >60 site loads hitting uncached repos per hour. |
 | `COMMITS_CACHE_TTL` | no | Seconds to cache GitHub commit data. Default `3600` (1 hour). |
 | `CONFIG_CACHE_TTL` | no | Seconds to cache `config.json`. Default `300` (5 minutes). |
 
