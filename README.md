@@ -1,5 +1,11 @@
 # Cole Branston - Portfolio
 
+## Main Docker Run Command: 
+
+`docker run -d  -p 3000:3000 --name personal_website_container personal_website_image`
+
+
+
 A dark, terminal-inspired personal site built with Next.js (App Router). Content
 (personal info, education, skills, work experience, projects) is pulled at
 request time from `config.json` in the
